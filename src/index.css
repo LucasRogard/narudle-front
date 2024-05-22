@@ -6,13 +6,39 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #282c34;
-  min-height: 100vh;
   flex-direction: column;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: #1c1c1c;
+  background-image: url('https://narutodle.net/Background.webp');
+  background-size: cover;
+  background-position-y: -140px;
+  background-attachment: fixed;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.suggestions {
+  list-style: none;
+  padding: 0;
+  margin: 5px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.suggestions li {
+  background-color: #f0f0f0;
+  padding: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 300px;
+  color: #282c34;
+}
+
+.suggestions li:hover {
+  background-color: #e0e0e0;
+}
+
