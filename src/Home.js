@@ -1,41 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from './api'; // Importez votre instance d'Axios
+import { useAuth0 } from '@auth0/auth0-react';
 
 function Home() {
+    const { user, isAuthenticated, isLoading } = useAuth0(); // Utilisez useAuth0 pour obtenir les informations de l'utilisateur
     const [proposition, setProposition] = useState('');
     const [suggestions, setSuggestions] = useState([]);
     const [essais, setEssais] = useState([]);
     const [characters, setCharacters] = useState([]);
     const [victoire, setVictoire] = useState(false);
     const [personnageChoisi, setPersonnageChoisi] = useState(null);
+    const [gameId, setGameId] = useState(null); // State to store the game ID
+    const effectExecutedRef = useRef(false); // Ref to check if the effect has already been executed
 
     useEffect(() => {
-        const fetchCharacters = async () => {
-            try {
-                const response = await api.get('/characters');
-                console.log('Données récupérées :', response.data);
-                setCharacters(response.data);
-            } catch (error) {
-                console.error('Erreur lors de la récupération des personnages:', error);
+        const fetchGameCharacter = async () => {
+            console.log("useEffect triggered");
+
+            if (!isLoading && isAuthenticated && user && !effectExecutedRef.current) {
+                effectExecutedRef.current = true; // Mark the effect as executed
+                try {
+                    console.log("Creating a new game");
+                    const response = await api.post('/games', { user: user.sub }); // Utilisez l'ID utilisateur d'Auth0
+                    console.log('Personnage choisi:', response.data.characterName);
+                    setPersonnageChoisi(response.data.characterName);
+                    setGameId(response.data.gameId); // Store the game ID
+
+                    // Fetch all characters to use for suggestions
+                    const charactersResponse = await api.get('/characters');
+                    setCharacters(charactersResponse.data);
+                } catch (error) {
+                    console.error('Erreur lors de la création de la partie:', error);
+                }
             }
         };
 
-        fetchCharacters();
-    }, []);
-
-    useEffect(() => {
-        if (characters.length > 0) {
-            resetPartie();
-        }
-    }, [characters]);
+        fetchGameCharacter();
+    }, [isLoading, isAuthenticated, user]);
 
     const resetPartie = () => {
-        const personnageIndex = Math.floor(Math.random() * characters.length);
-        const personnage = characters[personnageIndex];
-        setPersonnageChoisi(personnage);
-        setVictoire(false);
-        setEssais([]);
-        setProposition('');
+        const fetchGameCharacter = async () => {
+            if (isAuthenticated && user) {
+                try {
+                    console.log("Resetting the game");
+                    const response = await api.post('/games', { user: user.sub }); // Utilisez l'ID utilisateur d'Auth0
+                    console.log('Personnage choisi:', response.data.characterName);
+                    setPersonnageChoisi(response.data.characterName);
+                    setGameId(response.data.gameId); // Store the new game ID
+                    setVictoire(false);
+                    setEssais([]);
+                    setProposition('');
+                } catch (error) {
+                    console.error('Erreur lors de la création de la partie:', error);
+                }
+            }
+        };
+
+        fetchGameCharacter();
     };
 
     const handleInputChange = (event) => {
@@ -52,19 +73,30 @@ function Home() {
             .filter(name => name.toLowerCase().startsWith(inputValue.toLowerCase()));
 
         const remainingSuggestions = filteredSuggestions.filter(
-            suggestion => !essais.some(essai => essai.name === suggestion)
+            suggestion => !essais.map(essai => essai.character_name).includes(suggestion)
         );
         setSuggestions(remainingSuggestions);
+
+        if (remainingSuggestions.length === 1 && remainingSuggestions[0].toLowerCase() === inputValue.toLowerCase()) {
+            handleSuggestionClick(remainingSuggestions[0]);
+        }
     };
 
-    const handleSuggestionClick = (suggestion) => {
-        const character = characters.find(character => character.name === suggestion);
-        setEssais([...essais, character]);
-        setProposition('');
-        setSuggestions([]);
+    const handleSuggestionClick = async (suggestion) => {
+        try {
+            const response = await api.post('/tries', { id_game: gameId, character_name: suggestion });
+            const result = response.data;
+            setEssais([...essais, result]);
 
-        if (character.name.toLowerCase() === personnageChoisi.name.toLowerCase()) {
-            setVictoire(true);
+            setProposition('');
+            setSuggestions([]);
+
+            if (suggestion.toLowerCase() === personnageChoisi.toLowerCase()) {
+                setVictoire(true);
+                endGame(); // Call the function to end the game
+            }
+        } catch (error) {
+            console.error('Erreur lors de la création de la tentative:', error);
         }
     };
 
@@ -77,6 +109,21 @@ function Home() {
             handleSuggestionClick(suggestions[0]);
         }
     };
+
+    const endGame = async () => {
+        if (gameId) {
+            try {
+                await api.patch(`/games/${gameId}/end`, { end: true });
+                console.log('Game ended successfully');
+            } catch (error) {
+                console.error('Erreur lors de la mise à jour de la partie:', error);
+            }
+        }
+    };
+
+    if (isLoading) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <div>
