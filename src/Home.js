@@ -73,24 +73,30 @@ function Home() {
             .filter(name => name.toLowerCase().startsWith(inputValue.toLowerCase()));
 
         const remainingSuggestions = filteredSuggestions.filter(
-            suggestion => !essais.includes(suggestion)
+            suggestion => !essais.map(essai => essai.character_name).includes(suggestion)
         );
         setSuggestions(remainingSuggestions);
 
         if (remainingSuggestions.length === 1 && remainingSuggestions[0].toLowerCase() === inputValue.toLowerCase()) {
-            setVictoire(true);
-            endGame(); // Call the function to end the game
+            handleSuggestionClick(remainingSuggestions[0]);
         }
     };
 
-    const handleSuggestionClick = (suggestion) => {
-        setEssais([...essais, suggestion]);
-        setProposition('');
-        setSuggestions([]);
+    const handleSuggestionClick = async (suggestion) => {
+        try {
+            const response = await api.post('/tries', { id_game: gameId, character_name: suggestion });
+            const result = response.data;
+            setEssais([...essais, result]);
 
-        if (suggestion.toLowerCase() === personnageChoisi.toLowerCase()) {
-            setVictoire(true);
-            endGame(); // Call the function to end the game
+            setProposition('');
+            setSuggestions([]);
+
+            if (suggestion.toLowerCase() === personnageChoisi.toLowerCase()) {
+                setVictoire(true);
+                endGame(); // Call the function to end the game
+            }
+        } catch (error) {
+            console.error('Erreur lors de la création de la tentative:', error);
         }
     };
 
@@ -147,7 +153,9 @@ function Home() {
                     <h3>Essais :</h3>
                     <ul>
                         {essais.map((essai, index) => (
-                            <li key={index}>{essai}</li>
+                            <li key={index}>
+                                {essai.character_name} - Genre: {essai.genre}, Affiliations: {essai.affiliations}, Rang: {essai.rang}, Chakra: {essai.chakra}, Attributs: {essai.attributs}, Arc: {essai.arc}
+                            </li>
                         ))}
                     </ul>
                     <button onClick={handleResetLock} style={{ position: 'absolute', bottom: '10px', left: '10px' }}>Reset Lock</button>
