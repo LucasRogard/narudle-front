@@ -24,7 +24,9 @@ function Home() {
     }, []);
 
     useEffect(() => {
-        resetPartie();
+        if (characters.length > 0) {
+            resetPartie();
+        }
     }, [characters]);
 
     const resetPartie = () => {
@@ -50,21 +52,18 @@ function Home() {
             .filter(name => name.toLowerCase().startsWith(inputValue.toLowerCase()));
 
         const remainingSuggestions = filteredSuggestions.filter(
-            suggestion => !essais.includes(suggestion)
+            suggestion => !essais.some(essai => essai.name === suggestion)
         );
         setSuggestions(remainingSuggestions);
-
-        if (remainingSuggestions.length === 1 && remainingSuggestions[0].toLowerCase() === proposition.toLowerCase()) {
-            setVictoire(true);
-        }
     };
 
     const handleSuggestionClick = (suggestion) => {
-        setEssais([...essais, suggestion]);
+        const character = characters.find(character => character.name === suggestion);
+        setEssais([...essais, character]);
         setProposition('');
         setSuggestions([]);
 
-        if (suggestion.toLowerCase() === proposition.toLowerCase()) {
+        if (character.name.toLowerCase() === personnageChoisi.name.toLowerCase()) {
             setVictoire(true);
         }
     };
@@ -74,10 +73,8 @@ function Home() {
     };
 
     const handleInputKeyDown = (event) => {
-        if (event.key === 'Enter') {
-            if (suggestions.length > 0) {
-                handleSuggestionClick(suggestions[0]);
-            }
+        if (event.key === 'Enter' && suggestions.length > 0) {
+            handleSuggestionClick(suggestions[0]);
         }
     };
 
@@ -104,12 +101,35 @@ function Home() {
                             ))}
                         </ul>
                     )}
-                    <h3>Essais :</h3>
-                    <ul>
-                        {essais.map((essai, index) => (
-                            <li key={index}>{essai}</li>
-                        ))}
-                    </ul>
+                    {essais.length > 0 && (
+                        <div className="essais-container">
+                            <h3>Essais :</h3>
+                            <div className="table">
+                                <div className="row header">
+                                    <div>Nom</div>
+                                    <div>Image</div>
+                                    <div>Genre</div>
+                                    <div>Affiliations</div>
+                                    <div>Rang</div>
+                                    <div>Chakra</div>
+                                    <div>Attributs</div>
+                                    <div>Arc</div>
+                                </div>
+                                {essais.map((essai, index) => (
+                                    <div key={index} className="row">
+                                        <div>{essai.name}</div>
+                                        <div><img src={essai.imageUrl} alt={essai.name} style={{ width: '50px', height: '50px' }} /></div>
+                                        <div>{essai.genre}</div>
+                                        <div>{essai.affiliations}</div>
+                                        <div>{essai.rang}</div>
+                                        <div>{essai.chakra}</div>
+                                        <div>{essai.attributs}</div>
+                                        <div>{essai.arc}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                     <button onClick={handleResetLock} style={{ position: 'absolute', bottom: '10px', left: '10px' }}>Reset Lock</button>
                 </>
             ) : (
