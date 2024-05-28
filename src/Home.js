@@ -83,10 +83,11 @@ function Home() {
     };
 
     const handleSuggestionClick = async (suggestion) => {
+        const selectedCharacter = characters.find(character => character.name.toLowerCase() === suggestion.toLowerCase());
         try {
             const response = await api.post('/tries', { id_game: gameId, character_name: suggestion });
             const result = response.data;
-            setEssais([...essais, result]);
+            setEssais([...essais, { ...result, character: selectedCharacter }]);
 
             setProposition('');
             setSuggestions([]);
@@ -97,6 +98,19 @@ function Home() {
             }
         } catch (error) {
             console.error('Erreur lors de la création de la tentative:', error);
+        }
+    };
+
+    const getColorClass = (status) => {
+        switch (status) {
+            case 'ok':
+                return 'green';
+            case 'partiel':
+                return 'orange';
+            case 'faux':
+                return 'red';
+            default:
+                return '';
         }
     };
 
@@ -164,14 +178,14 @@ function Home() {
                                 </div>
                                 {essais.map((essai, index) => (
                                     <div key={index} className="row">
-                                        <div>{essai.name}</div>
-                                        <div><img src={essai.imageUrl} alt={essai.name} style={{ width: '50px', height: '50px' }} /></div>
-                                        <div>{essai.genre}</div>
-                                        <div>{essai.affiliations}</div>
-                                        <div>{essai.rang}</div>
-                                        <div>{essai.chakra}</div>
-                                        <div>{essai.attributs}</div>
-                                        <div>{essai.arc}</div>
+                                        <div>{essai.character.name}</div>
+                                        <div><img src={essai.character.imageUrl} alt={essai.character.name} style={{ width: '50px', height: '50px' }} /></div>
+                                        <div className={getColorClass(essai.genre)}>{essai.character.genre}</div>
+                                        <div className={getColorClass(essai.affiliations)}>{essai.character.affiliations}</div>
+                                        <div className={getColorClass(essai.rang)}>{essai.character.rang}</div>
+                                        <div className={getColorClass(essai.chakra)}>{essai.character.chakra}</div>
+                                        <div className={getColorClass(essai.attributs)}>{essai.character.attributs}</div>
+                                        <div className={getColorClass(essai.arc)}>{essai.character.arc}</div>
                                     </div>
                                 ))}
                             </div>
