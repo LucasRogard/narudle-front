@@ -42,3 +42,27 @@ code {
   background-color: #e0e0e0;
 }
 
+.essais-container {
+  margin: 0 auto; /* Centrer horizontalement */
+  max-width: 800px; /* Définir une largeur maximale pour le conteneur */
+}
+
+.table {
+  display: table;
+  width: 100%;
+}
+
+.row {
+  display: table-row;
+}
+
+.row div {
+  display: table-cell;
+  padding: 8px;
+}
+
+.header div {
+  font-weight: bold;
+}
+
+
