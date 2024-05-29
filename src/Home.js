@@ -73,7 +73,7 @@ function Home() {
             .filter(name => name.toLowerCase().startsWith(inputValue.toLowerCase()));
 
         const remainingSuggestions = filteredSuggestions.filter(
-            suggestion => !essais.map(essai => essai.character_name).includes(suggestion)
+            suggestion => !essais.map(essai => essai.character.name).includes(suggestion)
         );
         setSuggestions(remainingSuggestions);
 
@@ -83,6 +83,12 @@ function Home() {
     };
 
     const handleSuggestionClick = async (suggestion) => {
+        // Vérifiez si le personnage a déjà été ajouté
+        if (essais.some(essai => essai.character.name.toLowerCase() === suggestion.toLowerCase())) {
+            console.warn('Personnage déjà ajouté');
+            return;
+        }
+
         const selectedCharacter = characters.find(character => character.name.toLowerCase() === suggestion.toLowerCase());
         try {
             const response = await api.post('/tries', { id_game: gameId, character_name: suggestion });
@@ -167,24 +173,25 @@ function Home() {
                             <h3>Essais :</h3>
                             <div className="table">
                                 <div className="row header">
-                                    <div>Nom</div>
-                                    <div>Image</div>
+                                    <div>Caractère</div>
                                     <div>Genre</div>
                                     <div>Affiliations</div>
                                     <div>Rang</div>
-                                    <div>Chakra</div>
+                                    <div>Types de chakra</div>
                                     <div>Attributs</div>
-                                    <div>Arc</div>
+                                    <div>Arc de début</div>
                                 </div>
                                 {essais.map((essai, index) => (
                                     <div key={index} className="row">
-                                        <div>{essai.character.name}</div>
-                                        <div><img src={essai.character.imageUrl} alt={essai.character.name} style={{ width: '50px', height: '50px' }} /></div>
+                                        <div className="img-cell"><img src={essai.character.imageUrl}
+                                                                       alt={essai.character.name}/></div>
                                         <div className={getColorClass(essai.genre)}>{essai.character.genre}</div>
-                                        <div className={getColorClass(essai.affiliations)}>{essai.character.affiliations}</div>
+                                        <div
+                                            className={getColorClass(essai.affiliations)}>{essai.character.affiliations}</div>
                                         <div className={getColorClass(essai.rang)}>{essai.character.rang}</div>
                                         <div className={getColorClass(essai.chakra)}>{essai.character.chakra}</div>
-                                        <div className={getColorClass(essai.attributs)}>{essai.character.attributs}</div>
+                                        <div
+                                            className={getColorClass(essai.attributs)}>{essai.character.attributs}</div>
                                         <div className={getColorClass(essai.arc)}>{essai.character.arc}</div>
                                     </div>
                                 ))}

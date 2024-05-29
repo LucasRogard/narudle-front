@@ -1,8 +1,8 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #282c34;
@@ -17,7 +17,7 @@ body {
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  monospace;
 }
 
 .suggestions {
@@ -50,6 +50,7 @@ code {
 .table {
   display: table;
   width: 100%;
+  border-collapse: collapse; /* Ajouter cette ligne pour réduire l'espace entre les cellules */
 }
 
 .row {
@@ -58,19 +59,48 @@ code {
 
 .row div {
   display: table-cell;
-  padding: 8px;
+  padding: 5px;
+  text-align: center;
+  border: 1px solid #ddd; /* Ajouter des bordures pour chaque cellule */
+  word-wrap: break-word; /* Permet de couper les mots */
+  white-space: normal; /* Permet de faire du wrap sur les mots longs */
+  font-size: 12px; /* Réduire la taille de la police */
 }
 
 .header div {
   font-weight: bold;
+  background-color: #f2f2f2;
 }
 
 .green {
-  color: green;
+  background-color: green;
+  color: white;
+  padding: 5px;
+  border-radius: 5px;
 }
+
 .orange {
-  color: orange;
+  background-color: orange;
+  color: white;
+  padding: 5px;
+  border-radius: 5px;
 }
+
 .red {
-  color: red;
+  background-color: red;
+  color: white;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.img-cell {
+  padding: 0; /* Enlever le padding pour l'image */
+  width: 50px; /* Assurez-vous que la largeur de la cellule correspond à la taille de l'image */
+  height: 50px; /* Assurez-vous que la hauteur de la cellule correspond à la taille de l'image */
+}
+
+.img-cell img {
+  width: 100%; /* Assurez-vous que l'image prend toute la largeur de la cellule */
+  height: 100%; /* Assurez-vous que l'image prend toute la hauteur de la cellule */
+  object-fit: cover; /* Garder l'image bien ajustée dans la cellule */
 }
